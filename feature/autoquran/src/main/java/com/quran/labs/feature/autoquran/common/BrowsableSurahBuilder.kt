@@ -16,7 +16,8 @@ import kotlinx.coroutines.withContext
 class BrowsableSurahBuilder @Inject constructor(
   @param:ApplicationContext private val appContext: Context,
   private val pageProvider: PageProvider,
-  private val audioExtensionDecider: AudioExtensionDecider
+  private val audioExtensionDecider: AudioExtensionDecider,
+  private val qariArtworkProvider: QariArtworkProvider,
 ) {
 
   private val qariMediaItem: MediaItem by lazy {
@@ -117,6 +118,7 @@ class BrowsableSurahBuilder @Inject constructor(
    */
   private fun makeMediaItem(qari: Qari): MediaItem {
     val mediaId = "quran_${qari.id}"
+    val artwork = qariArtworkProvider.artworkPngFor(qari)
     return MediaItem.Builder()
       .setMediaId(mediaId)
       .setMediaMetadata(
@@ -124,6 +126,11 @@ class BrowsableSurahBuilder @Inject constructor(
           .setTitle(appContext.getString(qari.nameResource))
           .setIsBrowsable(true)
           .setMediaType(MediaMetadata.MEDIA_TYPE_ARTIST)
+          .apply {
+            if (artwork != null) {
+              setArtworkData(artwork, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+            }
+          }
           .setIsPlayable(false)
           .build()
       )
@@ -141,6 +148,7 @@ class BrowsableSurahBuilder @Inject constructor(
     } else {
       qari.url to MimeTypes.AUDIO_MPEG
     }
+    val artwork = qariArtworkProvider.suraArtworkPngFor(qari, sura)
 
     return MediaItem.Builder()
       .setMediaId("sura_${sura}_${qari.id}")
@@ -153,6 +161,11 @@ class BrowsableSurahBuilder @Inject constructor(
           .setTrackNumber(sura)
           .setTotalTrackCount(114)
           .setArtist(appContext.getString(qari.nameResource))
+          .apply {
+            if (artwork != null) {
+              setArtworkData(artwork, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+            }
+          }
           .build()
       )
       .setMimeType(mimeType)
