@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="app_name">Kur\'an</string>
   <string name="downloadPrompt_title">Preuzmite neophodne datoteke?</string>
   <string name="downloadPrompt">Da bi Kur\'an za Android radio ispravno,
@@ -103,7 +103,7 @@
   <string name="storage_permission_please_restart">Molimo restartujte aplikaciju da bi ovo imalo učinka.</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Pronađeno u suri %1$s: %2$d (Stranica %3$d)</string>
+  <string name="found_in_sura">Pronađeno u suri (%1$d) %2$s: %3$d (Stranica %4$d)</string>
   <string name="no_results">Nema rezultata za \"%s\"</string>
   <string name="no_arabic_search_available">Niste preuzeli Arapski paket za pretragu. Molimo preuzmite paket i pokušajte ponovo.</string>
   <string name="get_arabic_search_db">Preuzmite arapsku bazu za pretraživanje</string>
@@ -117,12 +117,6 @@
   <string name="prefs_use_arabic_title">Arapski (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Koristite aplikaciju na arapskom</string>
   <string name="prefs_new_background_title">Nova pozadina</string>
-  <string name="prefs_lock_orientation_title">Zabranite rotaciju zaslona u aplikaciji</string>
-  <string name="prefs_lock_orientation_summary_on">Koristite fiksni način orijentacije</string>
-  <string name="prefs_lock_orientation_summary_off">Prilagodite trenutnom načinu orijentacije</string>
-  <string name="prefs_landscape_orientation_title">Horizontalna orijentacija</string>
-  <string name="prefs_landscape_orientation_summary_on">Uvijek koristi horizontalni način orijentacije</string>
-  <string name="prefs_landscape_orientation_summary_off">Uvijek koristi vertikalni način orijentacije</string>
   <string name="prefs_night_mode_title">Noćni način </string>
   <string name="prefs_night_mode_summary">Koristite tamnu podlogu i svjetle fontove</string>
   <string name="prefs_night_mode_text_brightness_title">Osvijetljenost teksta</string>

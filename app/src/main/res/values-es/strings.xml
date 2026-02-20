@@ -37,7 +37,7 @@
     <item quantity="other">%2$d resultados para \"%1$s\": </item>
   </plurals>
   <!--Search messages-->
-  <string name="found_in_sura">Capítulo encontrado %1$s: %2$d (Página %3$d)</string>
+  <string name="found_in_sura">Capítulo encontrado (%1$d) %2$s: %3$d (Página %4$d)</string>
   <string name="no_results">No se encontró \"%s\"</string>
   <string name="no_arabic_search_available">Usted no ha descargado el paquete de búsqueda árabe. Por favor descargue y pruebe nuevamente su búsqueda.</string>
   <string name="get_arabic_search_db">Buscar en la Base de Datos Árabe</string>
@@ -50,12 +50,6 @@
   <string name="prefs_use_arabic_title">Modo Árabe (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">La aplicación se mostrará en Árabe </string>
   <string name="prefs_new_background_title">Nuevo fondo</string>
-  <string name="prefs_lock_orientation_title">Bloquear orientación de la pantalla</string>
-  <string name="prefs_lock_orientation_summary_on">La Página del Corán estará en modo de orientación fija</string>
-  <string name="prefs_lock_orientation_summary_off">Adaptable a la orientación actual</string>
-  <string name="prefs_landscape_orientation_title">Orientación horizontal</string>
-  <string name="prefs_landscape_orientation_summary_on">Se utilizará orientación horizontal</string>
-  <string name="prefs_landscape_orientation_summary_off">Se utilizará la orientación vertical</string>
   <string name="prefs_night_mode_title">Modo nocturno</string>
   <string name="prefs_night_mode_summary">Se utilizará fondo oscuro y fuentes claras</string>
   <string name="prefs_night_mode_text_brightness_title">Texto Brillante</string>

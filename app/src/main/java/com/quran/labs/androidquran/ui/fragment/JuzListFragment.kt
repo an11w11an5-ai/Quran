@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,16 +24,15 @@ import com.quran.labs.androidquran.ui.QuranActivity
 import com.quran.labs.androidquran.ui.helpers.QuranListAdapter
 import com.quran.labs.androidquran.ui.helpers.QuranRow
 import com.quran.labs.androidquran.ui.helpers.QuranRow.Builder
-import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.JuzView
+import dev.zacsweers.metro.Inject
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.observers.DisposableSingleObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Fragment that displays a list of all Juz (using [QuranListAdapter], each divided into
@@ -71,6 +73,21 @@ class JuzListFragment : Fragment() {
     recyclerView.adapter = adapter
     this.recyclerView = recyclerView
     this.adapter = adapter
+
+    ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { view, windowInsets ->
+      val insets = windowInsets.getInsets(
+        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+      )
+      recyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        // top, left, right are handled by QuranActivity
+        view.setPadding(0, 0, 0, insets.bottom)
+      }
+
+      // if we return WindowInsetsCompat.CONSUMED, the SnackBar won't
+      // be properly positioned on Android 29 and below (will be under
+      // the navigation bar).
+      windowInsets
+    }
     return view
   }
 
@@ -117,8 +134,7 @@ class JuzListFragment : Fragment() {
         })
     }
 
-    val settings = QuranSettings.getInstance(activity)
-    if (settings.isArabicNames) {
+    if (QuranUtils.isRtl()) {
       updateScrollBarPositionHoneycomb()
     }
     super.onResume()
@@ -158,7 +174,7 @@ class JuzListFragment : Fragment() {
         val juz = 1 + i / 8
         val juzTitle = activity.getString(
           R.string.juz2_description,
-          QuranUtils.getLocalizedNumber(activity, juz)
+          QuranUtils.getLocalizedNumber(juz)
         )
         val builder = Builder()
           .withType(QuranRow.HEADER)
@@ -177,7 +193,7 @@ class JuzListFragment : Fragment() {
         .withPage(page)
         .withJuzType(ENTRY_TYPES[i % 4])
       if (i % 4 == 0) {
-        val overlayText = QuranUtils.getLocalizedNumber(activity, 1 + i / 4)
+        val overlayText = QuranUtils.getLocalizedNumber(1 + i / 4)
         builder.withJuzOverlayText(overlayText)
       }
       elements[ctr++] = builder.build()

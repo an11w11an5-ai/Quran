@@ -2,12 +2,10 @@ package com.quran.mobile.recitation.presenter
 
 import com.quran.data.di.AppScope
 import com.quran.recitation.presenter.RecitationSettings
-import com.squareup.anvil.annotations.ContributesBinding
-import javax.inject.Inject
-import javax.inject.Singleton
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
-@Singleton
-@ContributesBinding(scope = AppScope::class, boundType = RecitationSettings::class)
+@SingleIn(AppScope::class)
 class RecitationSettingsImpl @Inject constructor() : RecitationSettings {
   override fun isRecitationEnabled() = false
   override fun toggleAyahVisibility() {}

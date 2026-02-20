@@ -2,12 +2,10 @@ package com.quran.labs.androidquran
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -30,15 +28,7 @@ class QuranAdvancedPreferenceActivity : AppCompatActivity() {
   private var locationToWrite: String? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    (application as QuranApplication).refreshLocale(this, false)
-
-    // override these to always be dark since the app doesn't really
-    // have a light theme until now. without this, the clock color in
-    // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
-    )
+    enableEdgeToEdge()
 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.preferences)
@@ -50,7 +40,6 @@ class QuranAdvancedPreferenceActivity : AppCompatActivity() {
       )
       root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         topMargin = insets.top
-        bottomMargin = insets.bottom
         leftMargin = insets.left
         rightMargin = insets.right
       }

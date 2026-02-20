@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.asImageBitmap
 import com.quran.analytics.CrashReporter
 import com.quran.data.core.QuranFileManager
+import com.quran.data.core.QuranInfo
 import com.quran.data.core.QuranPageInfo
 import com.quran.data.dao.BookmarksDao
 import com.quran.data.dao.Settings
@@ -19,33 +20,41 @@ import com.quran.data.model.selection.withSelectionIndicator
 import com.quran.data.model.selection.withYScroll
 import com.quran.data.source.PageProvider
 import com.quran.labs.androidquran.common.audio.model.playback.currentPlaybackAyah
+import com.quran.labs.androidquran.common.audio.model.playback.currentPlaybackWord
 import com.quran.labs.androidquran.common.audio.repository.AudioStatusRepository
 import com.quran.labs.androidquran.extra.feature.linebyline.model.DisplayText
 import com.quran.labs.androidquran.extra.feature.linebyline.model.EmptyPageInfo
 import com.quran.labs.androidquran.extra.feature.linebyline.model.HighlightAyah
 import com.quran.labs.androidquran.extra.feature.linebyline.model.HighlightType
 import com.quran.labs.androidquran.extra.feature.linebyline.model.LineModel
+import com.quran.labs.androidquran.extra.feature.linebyline.model.MissingLineByLineImagesException
 import com.quran.labs.androidquran.extra.feature.linebyline.model.PageInfo
 import com.quran.labs.androidquran.extra.feature.linebyline.model.SidelineDirection
 import com.quran.labs.androidquran.extra.feature.linebyline.model.SidelineModel
 import com.quran.labs.androidquran.extra.feature.linebyline.presenter.selection.SelectionHelper
 import com.quran.labs.androidquran.extra.feature.linebyline.presenter.selection.mergeWith
+import com.quran.mobile.linebyline.data.dao.AyahHighlight
+import com.quran.mobile.linebyline.data.dao.AyahMarkerInfo
+import com.quran.mobile.linebyline.data.dao.SuraHeader
+import com.quran.mobile.linebyline.data.dao.WordHighlight
+import com.quran.mobile.linebyline.data.dao.asAyahHighlight
 import com.quran.mobile.linebyline.data.model.PageModel
+import com.quran.mobile.mapper.imlaei.data.ImlaeiUthmaniMapper
+import com.quran.mobile.mapper.imlaei.data.WordAlignment
 import com.quran.reading.common.ReadingEventPresenter
+import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 import java.io.File
-import javax.inject.Inject
 
 class QuranLineByLinePresenter @Inject constructor(
   private val quranFileManager: QuranFileManager,
@@ -59,27 +68,51 @@ class QuranLineByLinePresenter @Inject constructor(
   private val settings: Settings,
   private val lineByLineSettings: QuranLineByLineSettingsPresenter,
   private val crashReporter: CrashReporter,
+  private val quranInfo: QuranInfo,
+  private val imlaeiUthmaniMapper: ImlaeiUthmaniMapper,
   pages: IntArray
 ) {
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
   private val page = pages[0]
-  private val ayahHighlightFlow =
-    pageModel.ayahHighlight(pages[0])
-      .stateIn(scope, SharingStarted.Lazily, emptyList())
 
   private var lastXOffset: Float = 0f
   private var lastYOffset: Float = 0f
   private var selectionStartSuraAyah: SuraAyah? = null
 
+  private data class PageDetails(
+    val lines: ImmutableList<LineModel>,
+    val suraHeaders: ImmutableList<SuraHeader>,
+    val ayahMarkers: ImmutableList<AyahMarkerInfo>,
+    val ayahBounds: ImmutableList<AyahHighlight>,
+    val wordBounds: ImmutableList<WordHighlight>,
+    val imlaeiUthmaniMappings: List<WordAlignment>
+  )
+
+  private val pageDetailsFetcher: Deferred<PageDetails> by lazy {
+    scope.async {
+      withContext(Dispatchers.IO) {
+        val range = quranInfo.getVerseRangeForPage(page)
+        val startAyah = SuraAyah(range.startSura, range.startAyah)
+        val endAyah = SuraAyah(range.endingSura, range.endingAyah)
+
+        PageDetails(
+          lines = linesForPage(page),
+          suraHeaders = pageModel.suraHeaders(page),
+          ayahMarkers = pageModel.ayahMarkers(page),
+          ayahBounds = pageModel.ayahHighlight(page),
+          wordBounds = pageModel.wordHighlights(page),
+          imlaeiUthmaniMappings = imlaeiUthmaniMapper.mapWords(startAyah, endAyah)
+        )
+      }
+    }
+  }
+
   fun loadPage(): Flow<PageInfo> {
     return combine(
-      linesForPage(page),
-      pageModel.suraHeaders(page),
-      pageModel.ayahMarkers(page),
       pageSelection(),
       lineByLineSettings.displaySettingsFlow
-    ) { lines, suraHeaders, ayahMarkers, highlights, displaySettings ->
+    ) { highlights, displaySettings ->
       val displayText = DisplayText(
         quranPageInfo.suraName(page),
         quranPageInfo.juz(page),
@@ -101,14 +134,16 @@ class QuranLineByLinePresenter @Inject constructor(
       } else {
         -1
       }
+
+      val pageDetails = pageDetailsFetcher.await()
       PageInfo(
         page,
         pageProvider.pageType(),
         displayText,
         displaySettings,
-        lines,
-        suraHeaders,
-        ayahMarkers,
+        pageDetails.lines,
+        pageDetails.suraHeaders,
+        pageDetails.ayahMarkers,
         highlights,
         sidelines,
         targetScrollPosition,
@@ -122,6 +157,18 @@ class QuranLineByLinePresenter @Inject constructor(
     return EmptyPageInfo.copy(displaySettings = lineByLineSettings.latestDisplaySettings())
   }
 
+  suspend fun fallbackToImageType(): Boolean {
+    val currentPageType = settings.pageType()
+    val fallbackType = pageProvider.getFallbackPageType()
+    return if (fallbackType != null && currentPageType != fallbackType) {
+      settings.setPageType(fallbackType)
+      crashReporter.log("Line-by-line fallback from $currentPageType to $fallbackType")
+      true
+    } else {
+      false
+    }
+  }
+
   fun onClick() {
     readingEventPresenter.onClick()
     if (readingEventPresenter.ayahSelectionFlow.value !is AyahSelection.None) {
@@ -129,7 +176,7 @@ class QuranLineByLinePresenter @Inject constructor(
     }
   }
 
-  fun startSelection(x: Float, y: Float) {
+  suspend fun startSelection(x: Float, y: Float) {
     selectionStartSuraAyah = null
     selectionHelper.startSelection(x, y)
     modifySelectionRange(0f, 0f)
@@ -146,9 +193,10 @@ class QuranLineByLinePresenter @Inject constructor(
     }
   }
 
-  fun modifySelectionRange(offsetX: Float, offsetY: Float) {
+  suspend fun modifySelectionRange(offsetX: Float, offsetY: Float) {
     val previousSelection = readingEventPresenter.ayahSelectionFlow.value
-    val selectedAyah = selectionHelper.modifySelectionRange(offsetX, offsetY, ayahHighlightFlow.value)
+    val ayahHighlights = pageDetailsFetcher.await().ayahBounds
+    val selectedAyah = selectionHelper.modifySelectionRange(offsetX, offsetY, ayahHighlights)
     if (selectedAyah != null) {
       val selectionStart = selectionStartSuraAyah ?: selectedAyah
       selectionStartSuraAyah = selectionStart
@@ -178,7 +226,7 @@ class QuranLineByLinePresenter @Inject constructor(
     }
   }
 
-  fun endSelection() {
+  suspend fun endSelection() {
     selectionStartSuraAyah = null
     selectionHelper.endSelection()
     val currentSelection = readingEventPresenter.ayahSelectionFlow.value
@@ -214,11 +262,11 @@ class QuranLineByLinePresenter @Inject constructor(
     }
   }
 
-  private fun boundsFor(selection: AyahSelection): Pair<SelectionRectangle, SelectionRectangle>? {
+  private suspend fun boundsFor(selection: AyahSelection): Pair<SelectionRectangle, SelectionRectangle>? {
     val startAyah = selection.startSuraAyah() ?: return null
     val endAyah = selection.endSuraAyah() ?: return null
 
-    val highlights = ayahHighlightFlow.value
+    val highlights = pageDetailsFetcher.await().ayahBounds
     val initialStartBounds = highlights.firstOrNull { it.sura == startAyah.sura && it.ayah == startAyah.ayah }
     val initialEndBounds = highlights.lastOrNull { it.sura == endAyah.sura && it.ayah == endAyah.ayah }
 
@@ -245,11 +293,12 @@ class QuranLineByLinePresenter @Inject constructor(
 
   private fun pageSelection(): Flow<ImmutableList<HighlightAyah>> {
     return combine(
-      ayahHighlightFlow,
       bookmarksDao.bookmarksForPage(page),
       readingEventPresenter.ayahSelectionFlow,
       audioStatusRepository.audioPlaybackFlow,
-    ) { ayahHighlights, bookmarks, selectedAyah, audioPlaybackStatus ->
+    ) { bookmarks, selectedAyah, audioPlaybackStatus ->
+      val pageDetails = pageDetailsFetcher.await()
+      val ayahHighlights = pageDetails.ayahBounds
       val currentBookmarkHighlights = bookmarks.map {
           bookmark -> ayahHighlights.filter { it.sura == bookmark.sura && it.ayah == bookmark.ayah }
       }.map { HighlightAyah(HighlightType.BOOKMARK, it) }
@@ -287,9 +336,28 @@ class QuranLineByLinePresenter @Inject constructor(
           it.sura == audioPlaybackAyah.sura && it.ayah == audioPlaybackAyah.ayah
         }
       }
-      val audioHighlights = HighlightAyah(HighlightType.AUDIO, audioHighlight, true)
 
-      (bookmarkHighlights + selectedHighlights + audioHighlights)
+      val audioPlaybackWord = audioPlaybackStatus.currentPlaybackWord()
+      val wordHighlights = if (audioPlaybackAyah == null || audioPlaybackWord == null) {
+        emptyList()
+      } else {
+        val ayahWords = pageDetails.wordBounds.filter { it.sura == audioPlaybackAyah.sura && it.ayah == audioPlaybackAyah.ayah }
+
+        // find the corresponding mapping from imlaei => uthmani, since audioWordNumber is imlaei
+        val targetWord = pageDetails.imlaeiUthmaniMappings.find {
+          it.sura == audioPlaybackAyah.sura && it.ayah == audioPlaybackAyah.ayah && it.audioWordNumber == audioPlaybackWord
+        }
+
+        // each word in imlaei might correspond to one or more words in uthmani
+        targetWord?.glyphWordNumbers.orEmpty()
+          .mapNotNull { ayahWords.getOrNull(it - 1) }
+          .map { it.asAyahHighlight() }
+      }
+
+      val audioAyahHighlights = HighlightAyah(HighlightType.AUDIO, audioHighlight, wordHighlights.isEmpty())
+      val audioWordHighlights = HighlightAyah(HighlightType.AUDIO_WORD, wordHighlights, true)
+
+      (bookmarkHighlights + selectedHighlights + audioAyahHighlights + audioWordHighlights)
         .filter { it.ayahHighlights.isNotEmpty() }
         .toImmutableList()
     }
@@ -299,26 +367,29 @@ class QuranLineByLinePresenter @Inject constructor(
     return SuraAyah(sura, ayah) in start..end
   }
 
-  private fun linesForPage(page: Int): Flow<ImmutableList<LineModel>> {
-    return flow {
+  private suspend fun linesForPage(page: Int): ImmutableList<LineModel> {
+    return withContext(Dispatchers.IO) {
       val lines = mutableListOf<LineModel>()
       val whence = quranFileManager.quranImagesDirectory()
       for (lineNumber in 1..15) {
         val file = File(File(whence, page.toString()), "$lineNumber.png")
-        try {
-          val fileName = file.toString()
-          val sourceBitmap = BitmapFactory.decodeFile(fileName, options)
+
+        val fileName = file.toString()
+        val sourceBitmap = BitmapFactory.decodeFile(fileName, options)
+        if (sourceBitmap != null) {
           val bitmap = sourceBitmap.extractAlpha()
           sourceBitmap.recycle()
           lines.add(LineModel(lineNumber - 1, bitmap.asImageBitmap()))
-        } catch (exception: Exception) {
-          val status = if (file.exists()) { "exists" } else { "missing" }
-          // make sure to add the line number and page to the crash metadata
-          crashReporter.log("Failed to load line $lineNumber for page $page - file $status")
-          throw exception
+        } else {
+          val status = if (file.exists()) {
+            "exists: ${file.name} with length ${file.length()}"
+          } else {
+            "missing"
+          }
+          throw MissingLineByLineImagesException("Failed to load line $lineNumber for page $page - file $status")
         }
       }
-      emit(lines.toImmutableList())
+      lines.toImmutableList()
     }
   }
 
@@ -335,7 +406,7 @@ class QuranLineByLinePresenter @Inject constructor(
             it.extension == "png" &&
                 filenameWithoutOverrides.toIntOrNull() != null
           } ?: emptyList()
-        files.map {
+        files.mapNotNull {
           val filenameWithoutOverrides =
             it.nameWithoutExtension.replace("_down", "").replace("_up", "")
           val number = filenameWithoutOverrides.toInt()
@@ -349,9 +420,14 @@ class QuranLineByLinePresenter @Inject constructor(
           }
 
           val sourceBitmap = BitmapFactory.decodeFile(it.toString(), options)
-          val bitmap = sourceBitmap.extractAlpha()
-          sourceBitmap.recycle()
-          SidelineModel(bitmap.asImageBitmap(), number, actualDirection)
+          if (sourceBitmap != null) {
+            val bitmap = sourceBitmap.extractAlpha()
+            sourceBitmap.recycle()
+            SidelineModel(bitmap.asImageBitmap(), number, actualDirection)
+          } else {
+            crashReporter.log("failed to load sideline image [$it] on page [$page]")
+            null
+          }
         }.toImmutableList()
       } else {
         persistentListOf()

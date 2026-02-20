@@ -16,12 +16,9 @@ import com.quran.labs.androidquran.data.QuranDisplayData
 import com.quran.labs.androidquran.model.translation.ArabicDatabaseUtils
 import com.quran.labs.androidquran.ui.util.ToastCompat
 import com.quran.mobile.translation.model.LocalTranslation
-import dagger.Reusable
+import dev.zacsweers.metro.Inject
 import java.text.NumberFormat
-import java.util.Locale
-import javax.inject.Inject
 
-@Reusable
 class ShareUtil @Inject internal constructor(private val quranDisplayData: QuranDisplayData) {
 
   fun copyVerses(activity: Activity, verses: List<QuranText>) {
@@ -99,8 +96,7 @@ class ShareUtil @Inject internal constructor(private val quranDisplayData: Quran
   private fun getShareText(activity: Activity, verses: List<QuranText>): String {
     val size = verses.size
     val wantInlineAyahNumbers = size > 1
-    val isArabicNames = QuranSettings.getInstance(activity).isArabicNames
-    val locale = if (isArabicNames) Locale("ar") else Locale.getDefault()
+    val locale = QuranUtils.getCurrentLocale();
     val numberFormat = NumberFormat.getNumberInstance(locale)
     return buildString {
       append("{ ")

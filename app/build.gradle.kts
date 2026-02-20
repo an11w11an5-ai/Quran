@@ -6,7 +6,7 @@ plugins {
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.ksp)
   alias(libs.plugins.errorprone)
-  alias(libs.plugins.anvil)
+  alias(libs.plugins.metro)
 }
 
 // whether or not to use Firebase - Firebase is enabled by default, and is only disabled for
@@ -20,20 +20,24 @@ if (getGradle().startParameter.taskRequests.toString().contains("Release") && us
   apply(plugin = "com.google.firebase.crashlytics")
 }
 
-anvil {
-  useKsp(
-    contributesAndFactoryGeneration = true,
-    componentMerging = true
-  )
-}
-
 android {
   namespace = "com.quran.labs.androidquran"
 
   defaultConfig {
-    versionCode = 3457
-    versionName = "3.4.5"
+    versionCode = 3621
+    versionName = "3.6.2"
     testInstrumentationRunner = "com.quran.labs.androidquran.core.QuranTestRunner"
+  }
+
+  androidResources {
+    // Indonesian is still in instead of id due to https://issuetracker.google.com/issues/36911507
+    @Suppress("UnstableApiUsage")
+    localeFilters += listOf(
+      "ar", "az", "bg", "bn", "bs", "cs", "da", "de", "el", "es", "et", "fa",
+      "fi", "fr", "hi", "hr", "hu", "in", "it", "ja", "kk", "ko", "ku", "lt",
+      "lv", "ms", "nl", "pl", "ps", "pt", "ro", "ru", "sk", "sl", "sq", "sr",
+      "sv", "th", "tr", "ug", "uk", "ur", "uz", "vi", "zh"
+    )
   }
 
   dependenciesInfo {
@@ -63,6 +67,7 @@ android {
   buildTypes {
     create("beta") {
       isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard.cfg")
       signingConfig = signingConfigs.getByName("release")
       versionNameSuffix = "-beta"
@@ -77,6 +82,7 @@ android {
 
     getByName("release") {
       isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard.cfg")
       signingConfig = signingConfigs.getByName("release")
     }
@@ -91,7 +97,6 @@ android {
     }
   }
 
-  @Suppress("UnstableApiUsage")
   testOptions {
     unitTests {
       isIncludeAndroidResources = true
@@ -162,6 +167,8 @@ dependencies {
 
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.media)
+  implementation(libs.androidx.media3.exoplayer)
+  implementation(libs.androidx.media3.session)
   implementation(libs.androidx.localbroadcastmanager)
   implementation(libs.androidx.preference.ktx)
   implementation(libs.androidx.recyclerview)
@@ -178,11 +185,6 @@ dependencies {
   // rx
   implementation(libs.rxjava)
   implementation(libs.rxandroid)
-
-  // dagger
-  ksp(libs.dagger.compiler)
-  kspTest(libs.dagger.compiler)
-  implementation(libs.dagger.runtime)
 
   // analytics
   debugImplementation(project(":feature:analytics-noop"))
@@ -215,7 +217,6 @@ dependencies {
   testImplementation(libs.espresso.intents)
   testImplementation(libs.turbine)
   testImplementation(libs.kotlinx.coroutines.test)
-  testImplementation(project(":pages:data:madani"))
 
   errorprone(libs.errorprone.core)
 

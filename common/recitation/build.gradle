@@ -1,22 +1,14 @@
 plugins {
   id 'quran.android.library.android'
-  alias libs.plugins.anvil
+  alias libs.plugins.metro
 }
 
 android.namespace 'com.quran.recitation.common'
-
-anvil {
-  useKsp(true)
-  generateDaggerFactories.set(true)
-}
 
 dependencies {
   implementation project(path: ':common:data')
 
   implementation libs.androidx.annotation
-
-  // dagger
-  implementation libs.dagger.runtime
 
   // coroutines
   implementation libs.kotlinx.coroutines.core

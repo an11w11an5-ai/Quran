@@ -1,22 +1,14 @@
 plugins {
   id 'quran.android.library.android'
-  alias libs.plugins.anvil
+  alias libs.plugins.metro
 }
 
 android.namespace 'com.quran.labs.androidquran.common.toolbar'
-
-anvil {
-  useKsp(true)
-  generateDaggerFactories.set(true)
-}
-
 
 dependencies {
   implementation project(path: ':common:data')
   implementation project(path: ':common:reading')
   implementation project(path: ':common:bookmark')
-
-  implementation libs.dagger.runtime
 
   implementation libs.androidx.appcompat
   implementation libs.kotlinx.coroutines.core

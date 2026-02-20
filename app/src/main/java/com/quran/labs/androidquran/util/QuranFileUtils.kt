@@ -16,6 +16,7 @@ import com.quran.labs.androidquran.common.Response
 import com.quran.labs.androidquran.data.QuranDataProvider
 import com.quran.labs.androidquran.extension.closeQuietly
 import com.quran.mobile.di.qualifier.ApplicationContext
+import dev.zacsweers.metro.Inject
 import okhttp3.OkHttpClient
 import okhttp3.Request.Builder
 import okhttp3.ResponseBody
@@ -30,11 +31,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.io.InterruptedIOException
 import java.text.NumberFormat
 import java.util.Collections
 import java.util.Locale
-import javax.inject.Inject
 
 class QuranFileUtils @Inject constructor(
   @ApplicationContext context: Context,
@@ -219,15 +218,21 @@ class QuranFileUtils @Inject constructor(
   @WorkerThread
   override fun copyFromAssetsRelative(assetsPath: String, filename: String, destination: String) {
     val actualDestination = File(quranInternalBaseDirectory, destination)
-    if (!actualDestination.exists()) {
-      if (actualDestination.absolutePath.endsWith(filename)) {
-        actualDestination.parentFile?.mkdirs()
+    copyFromAssetsRelative(assetsPath, filename, actualDestination)
+  }
+
+  @WorkerThread
+  override fun copyFromAssetsRelative(assetsPath: String, filename: String, destination: File) {
+    if (!destination.exists()) {
+      if (destination.absolutePath.endsWith(filename)) {
+        destination.parentFile?.mkdirs()
       } else {
-        actualDestination.mkdirs()
+        destination.mkdirs()
       }
     }
-    copyFromAssets(assetsPath, filename, actualDestination)
+    copyFromAssets(assetsPath, filename, destination)
   }
+
 
   override fun copyFromAssetsRelativeRecursive(
     assetsPath: String,
@@ -312,32 +317,30 @@ class QuranFileUtils @Inject constructor(
       val response = call.execute()
       if (response.isSuccessful) {
         responseBody = response.body
-        if (responseBody != null) {
-          // handling for BitmapFactory.decodeStream not throwing an error
-          // when the download is interrupted or an exception occurs. This
-          // is taken from both Glide (see ExceptionHandlingInputStream) and
-          // Picasso (see BitmapFactory).
-          val exceptionCatchingSource =
-            ExceptionCatchingSource(responseBody.source())
-          val bufferedSource = exceptionCatchingSource.buffer()
-          val bitmap = decodeBitmapStream(bufferedSource.inputStream())
-          // throw if an error occurred while decoding the stream
-          exceptionCatchingSource.throwIfCaught()
-          if (bitmap != null) {
-            val path = getQuranImagesDirectory(widthParam)
-            var warning = Response.WARN_SD_CARD_NOT_FOUND
-            if (makeQuranImagesDirectory(widthParam)) {
-              val resultPath = File(path, filename)
-              warning = if (tryToSaveBitmap(
-                      bitmap, resultPath
-                  )
-              ) 0 else Response.WARN_COULD_NOT_SAVE_FILE
-            }
-            return Response(bitmap, warning)
+        // handling for BitmapFactory.decodeStream not throwing an error
+        // when the download is interrupted or an exception occurs. This
+        // is taken from both Glide (see ExceptionHandlingInputStream) and
+        // Picasso (see BitmapFactory).
+        val exceptionCatchingSource =
+          ExceptionCatchingSource(responseBody.source())
+        val bufferedSource = exceptionCatchingSource.buffer()
+        val bitmap = decodeBitmapStream(bufferedSource.inputStream())
+        // throw if an error occurred while decoding the stream
+        exceptionCatchingSource.throwIfCaught()
+        if (bitmap != null) {
+          val path = getQuranImagesDirectory(widthParam)
+          var warning = Response.WARN_SD_CARD_NOT_FOUND
+          if (makeQuranImagesDirectory(widthParam)) {
+            val resultPath = File(path, filename)
+            warning = if (tryToSaveBitmap(
+                bitmap, resultPath
+              )
+            ) 0 else Response.WARN_COULD_NOT_SAVE_FILE
           }
+          return Response(bitmap, warning)
         }
       }
-    } catch (iioe: InterruptedIOException) {
+    } catch (_: InterruptedException) {
       // do nothing, this is expected if the job is canceled
     } catch (ioe: IOException) {
       Timber.e(ioe, "exception downloading file")
@@ -437,6 +440,8 @@ class QuranFileUtils @Inject constructor(
     get() = File(quranInternalBaseDirectory, ayahInfoDirectory)
 
   override fun audioFileDirectory(): String? = getQuranAudioDirectory(appContext)
+
+  override fun databaseDirectory(): File = getQuranDatabaseDirectory()
 
   fun getQuranAudioDirectory(context: Context): String? {
     val path = getQuranBaseDirectory(context)?.let { it + audioDirectory } ?: return null

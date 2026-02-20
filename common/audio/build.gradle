@@ -1,14 +1,9 @@
 plugins {
   id 'quran.android.library.android'
   alias libs.plugins.kotlin.parcelize
-  alias libs.plugins.anvil
+  alias libs.plugins.metro
   // needed for the stability of various model classes
   alias libs.plugins.compose.compiler
-}
-
-anvil {
-  useKsp(true)
-  generateDaggerFactories.set(true)
 }
 
 android.namespace 'com.quran.labs.androidquran.common.audio'
@@ -19,7 +14,6 @@ dependencies {
   implementation project(":common:download")
   testImplementation project(":pages:data:madani")
 
-  implementation libs.dagger.runtime
   implementation libs.androidx.annotation
   implementation libs.kotlinx.coroutines.core
   implementation libs.okio

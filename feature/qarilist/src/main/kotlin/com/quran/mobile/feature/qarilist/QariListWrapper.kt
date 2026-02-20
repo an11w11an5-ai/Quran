@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,21 +24,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.quran.data.model.SuraAyah
 import com.quran.labs.androidquran.common.audio.model.QariItem
 import com.quran.labs.androidquran.common.audio.repository.CurrentQariManager
+import com.quran.labs.androidquran.common.ui.core.QuranIcons
 import com.quran.labs.androidquran.common.ui.core.QuranTheme
 import com.quran.mobile.feature.qarilist.di.QariListWrapperInjector
 import com.quran.mobile.feature.qarilist.presenter.QariListPresenter
 import com.quran.mobile.feature.qarilist.ui.QariList
+import dev.zacsweers.metro.Inject
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class QariListWrapper(
   context: Context,
@@ -102,7 +102,8 @@ class QariListWrapper(
         sheetPeekHeight = 0.dp,
         sheetDragHandle = null,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
+        sheetContainerColor = MaterialTheme.colorScheme.surface,
         sheetContentColor = MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.background),
         sheetContent = {
           Column {
@@ -116,7 +117,7 @@ class QariListWrapper(
               navigationIcon = {
                 IconButton(onClick = { closeDialog() }) {
                   Icon(
-                    imageVector = Icons.Filled.Close,
+                    imageVector = QuranIcons.Close,
                     contentDescription = stringResource(R.string.qarilist_dismiss)
                   )
                 }

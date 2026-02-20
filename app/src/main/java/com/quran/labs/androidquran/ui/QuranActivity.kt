@@ -6,15 +6,13 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AlertDialog.Builder
@@ -22,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -55,12 +55,12 @@ import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.SlidingTabLayout
 import com.quran.mobile.di.ExtraScreenProvider
+import dev.zacsweers.metro.Inject
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import javax.inject.Inject
 import kotlin.math.abs
 
 /**
@@ -106,18 +106,12 @@ class QuranActivity : AppCompatActivity(),
   @Inject
   lateinit var extraScreens: Set<@JvmSuppressWildcards ExtraScreenProvider>
 
-  public override fun onCreate(savedInstanceState: Bundle?) {
-    val quranApp = application as QuranApplication
-    quranApp.refreshLocale(this, false)
+  private var jumpToPageOnResume: Int? = null
 
-    // override these to always be dark since the app doesn't really
-    // have a light theme until now. without this, the clock color in
-    // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
-    )
+  public override fun onCreate(savedInstanceState: Bundle?) {
+    enableEdgeToEdge()
     super.onCreate(savedInstanceState)
+    val quranApp = application as QuranApplication
     quranApp.applicationComponent
       .activityComponentFactory()
       .generate(this)
@@ -136,7 +130,6 @@ class QuranActivity : AppCompatActivity(),
       )
       root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         topMargin = insets.top
-        bottomMargin = insets.bottom
         leftMargin = insets.left
         rightMargin = insets.right
       }
@@ -158,8 +151,10 @@ class QuranActivity : AppCompatActivity(),
     pager.adapter = pagerAdapter
     val indicator = findViewById<SlidingTabLayout>(R.id.indicator)
     indicator.setViewPager(pager)
-    if (isRtl) {
-      pager.currentItem = TITLES.size - 1
+    jumpToPageOnResume = if (isRtl) {
+      TITLES.size - 1
+    } else {
+      0
     }
 
     if (savedInstanceState != null) {
@@ -196,6 +191,12 @@ class QuranActivity : AppCompatActivity(),
       finish()
       startActivity(i)
     } else {
+      val pageToJumpTo = jumpToPageOnResume
+      if (pageToJumpTo != null) {
+        findViewById<ViewPager>(R.id.index_pager).currentItem = pageToJumpTo
+        jumpToPageOnResume = null
+      }
+
       compositeDisposable.add(
           Completable.timer(500, MILLISECONDS)
               .observeOn(AndroidSchedulers.mainThread())
@@ -204,7 +205,7 @@ class QuranActivity : AppCompatActivity(),
                   startService(
                     audioUtils.getAudioIntent(this@QuranActivity, AudioService.ACTION_STOP)
                   )
-                } catch (illegalStateException: IllegalStateException) {
+                } catch (_: IllegalStateException) {
                   // do nothing, we might be in the background
                   // onPause should have stopped us from needing this, but it sometimes happens
                 }
@@ -275,7 +276,7 @@ class QuranActivity : AppCompatActivity(),
   }
 
   private fun isRtl(): Boolean {
-    return settings.isArabicNames || QuranUtils.isRtl()
+    return QuranUtils.isRtl()
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -330,9 +331,9 @@ class QuranActivity : AppCompatActivity(),
       }
       R.id.other_apps -> {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("market://search?q=pub:quran.com")
+        intent.data = "market://search?q=pub:quran.com".toUri()
         if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) == null) {
-          intent.data = Uri.parse("https://play.google.com/store/search?q=pub:quran.com")
+          intent.data = "https://play.google.com/store/search?q=pub:quran.com".toUri()
         }
         startActivity(intent)
       }
@@ -354,6 +355,26 @@ class QuranActivity : AppCompatActivity(),
     supportActionMode = mode
     supportActionModeClearingCallback.isEnabled = true
     super.onSupportActionModeStarted(mode)
+
+    /**
+     * hack to fix the status bar color when action mode starts.
+     * unfortunately, despite being edge to edge, switching to contextual action mode causes
+     * [androidx.appcompat.app.AppCompatDelegate] and its implementation to set a status guard
+     * under the status bar (white in light mode, black in dark mode). this breaks the edge to
+     * edge look and feel, so we manually set the status guard's background color.
+     */
+    val abRoot = findViewById<ViewGroup>(androidx.appcompat.R.id.action_bar_root)
+    // has to be .post otherwise the background is set to the default color overriding this
+    abRoot.post {
+      val statusGuard = abRoot.getChildAt(abRoot.childCount - 1)
+      statusGuard?.let {
+        // not using `is` here because i literally want a View, not a subclass of View.
+        // checking top to be 0 is just a second just in case check.
+        if (statusGuard::class == View::class && statusGuard.top == 0) {
+          statusGuard.setBackgroundColor(ContextCompat.getColor(this, R.color.toolbar))
+        }
+      }
+    }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -425,6 +446,7 @@ class QuranActivity : AppCompatActivity(),
     i.putExtra("page", page)
     i.putExtra(PagerActivity.EXTRA_HIGHLIGHT_SURA, sura)
     i.putExtra(PagerActivity.EXTRA_HIGHLIGHT_AYAH, ayah)
+    i.putExtra(PagerActivity.EXTRA_JUMP_TO_TRANSLATION, settings.wasShowingTranslation)
     startActivity(i)
   }
 

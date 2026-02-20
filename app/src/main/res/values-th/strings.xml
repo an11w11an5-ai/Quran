@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="app_name">Quran</string>
   <string name="downloadPrompt_title">ต้องการดาวน์โหลดแฟ้มที่ต้องการหรือไม่</string>
   <string name="downloadPrompt">เพื่อให้อัลกุรอาน Android ทํางานได้อย่างถูกต้องเราจําเป็นต้องดาวน์โหลดไฟล์บางไฟล์ หากคุณไม่ทําเช่นนี้ในขณะนี้แอพอาจไม่ทํางานได้อย่างน่าเชื่อถือและจะต้องมีการเชื่อมต่ออินเทอร์เน็ตเพื่ออ่าน คุณต้องการดาวน์โหลดแฟ้มที่ต้องการเดี๋ยวนี้หรือไม่</string>
@@ -82,7 +82,7 @@
   <string name="storage_permission_please_restart">โปรดเริ่มแอปใหม่เพื่อให้แอปนี้มีผล</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">พบในซูเราะฮฺ %1$s: %2$d (หน้า %3$d)</string>
+  <string name="found_in_sura">พบในซูเราะฮฺ (%1$d) %2$s: %3$d (หน้า %4$d)</string>
   <string name="no_results">ไม่พบผลลัพธ์สําหรับ \"%s\"</string>
   <string name="no_arabic_search_available">คุณยังไม่ได้ดาวน์โหลดชุดค้นหาภาษาอาหรับ กรุณาดาวน์โหลดและลองค้นหาอีกครั้ง</string>
   <string name="get_arabic_search_db">รับฐานข้อมูลการค้นหาภาษาอาหรับ</string>
@@ -96,12 +96,6 @@
   <string name="prefs_use_arabic_title">โหมดอาหรับ (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">ใช้ภาษาอาหรับสําหรับอินเทอร์เฟซโปรแกรมประยุกต์</string>
   <string name="prefs_new_background_title">พื้นหลังใหม่</string>
-  <string name="prefs_lock_orientation_title">การวางแนวหน้าจอเมื่อล็อก</string>
-  <string name="prefs_lock_orientation_summary_on">ใช้โหมดการวางแนวคงที่</string>
-  <string name="prefs_lock_orientation_summary_off">ปรับให้เข้ากับโหมดการวางแนวปัจจุบัน</string>
-  <string name="prefs_landscape_orientation_title">การวางแนวในแนวนอน</string>
-  <string name="prefs_landscape_orientation_summary_on">ใช้โหมดแนวนอนเสมอ</string>
-  <string name="prefs_landscape_orientation_summary_off">ใช้โหมดแนวตั้งเสมอ</string>
   <string name="prefs_night_mode_title">โหมดกลางคืน</string>
   <string name="prefs_night_mode_summary">ใช้พื้นหลังสีเข้มและแบบอักษรสีอ่อน</string>
   <string name="prefs_night_mode_text_brightness_title">ความสว่างของข้อความ</string>

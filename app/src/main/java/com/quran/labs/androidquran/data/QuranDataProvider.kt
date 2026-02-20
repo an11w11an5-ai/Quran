@@ -19,10 +19,10 @@ import com.quran.labs.androidquran.database.TranslationsDBAdapter
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.mobile.translation.model.LocalTranslation
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
-import javax.inject.Inject
 
 class QuranDataProvider : ContentProvider() {
   private var didInject = false
@@ -134,6 +134,7 @@ class QuranDataProvider : ContentProvider() {
             val text = suggestions.getString(3)
             val foundText = context.getString(
               R.string.found_in_sura,
+              sura,
               quranDisplayData.getSuraName(context, sura, false),
               ayah,
               page

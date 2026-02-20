@@ -23,10 +23,10 @@ import com.google.common.util.concurrent.SettableFuture
 import com.quran.labs.feature.autoquran.common.BrowsableSurahBuilder
 import com.quran.labs.feature.autoquran.di.QuranAutoInjector
 import com.quran.mobile.di.QuranApplicationComponentProvider
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 class QuranBrowsableAudioPlaybackService : MediaSessionService() {
   @Inject
@@ -95,7 +95,7 @@ class QuranBrowsableAudioPlaybackService : MediaSessionService() {
   override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
     mediaSession
 
-  private inner class PlayerEventListener : Player.Listener
+  private class PlayerEventListener : Player.Listener
 
   private inner class QuranServiceCallback : MediaLibrarySession.Callback {
 

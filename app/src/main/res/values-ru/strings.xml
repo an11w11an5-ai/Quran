@@ -129,7 +129,7 @@
     </string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Найдено в суре %1$s: %2$d (Страница %3$d)</string>
+  <string name="found_in_sura">Найдено в суре (%1$d) %2$s: %3$d (Страница %4$d)</string>
   <string name="no_results">Результатов для \"%s\" не найдено</string>
   <string name="no_arabic_search_available">Вы не скачали пакет данных для арабского поиска.
         Пожалуйста, сначала скачайте его и воспользуйтесь поиском снова.
@@ -145,12 +145,6 @@
   <string name="prefs_use_arabic_title">Режим арабского (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Приложение будет локализовано под арабский язык </string>
   <string name="prefs_new_background_title">Новый фон</string>
-  <string name="prefs_lock_orientation_title">Удерживать ориентацию экрана</string>
-  <string name="prefs_lock_orientation_summary_on">Страницы Корана будут удерживаться в выбранном режиме</string>
-  <string name="prefs_lock_orientation_summary_off">Адаптировать под текущую ориентацию</string>
-  <string name="prefs_landscape_orientation_title">Альбомный режим</string>
-  <string name="prefs_landscape_orientation_summary_on">Использовать альбомный режим</string>
-  <string name="prefs_landscape_orientation_summary_off">Использовать портретный режим</string>
   <string name="prefs_night_mode_title">Ночной режим</string>
   <string name="prefs_night_mode_summary">Будет использован темный фон и светлый шрифт</string>
   <string name="prefs_night_mode_text_brightness_title">Яркость текста</string>

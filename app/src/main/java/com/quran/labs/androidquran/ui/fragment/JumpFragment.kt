@@ -29,8 +29,8 @@ import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.ui.helpers.JumpDestination
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.ForceCompleteTextView
+import dev.zacsweers.metro.Inject
 import timber.log.Timber
-import javax.inject.Inject
 import com.quran.mobile.common.ui.core.R as UiCoreR
 
 /**
@@ -54,14 +54,14 @@ class JumpFragment : DialogFragment() {
     @SuppressLint("InflateParams")
     val layout = inflater.inflate(R.layout.jump_dialog, null)
 
-    val builder = Builder(activity)
+    val builder = Builder(activity, R.style.QuranDialogTheme)
     builder.setTitle(activity.getString(R.string.menu_jump))
 
     // Sura chooser
     suraInput = layout.findViewById(R.id.sura_spinner)
     val suras = activity.resources.getStringArray(UiCoreR.array.sura_names)
         .mapIndexed { index: Int, sura: String? ->
-          QuranUtils.getLocalizedNumber(activity, index + 1) + ". " + sura
+          QuranUtils.getLocalizedNumber(index + 1) + ". " + sura
         }
 
     val suraAdapter = InfixFilterArrayAdapter(
@@ -135,7 +135,6 @@ class JumpFragment : DialogFragment() {
       override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
       override fun afterTextChanged(s: Editable) {
-        val context: Context? = getActivity()
         val ayahString = s.toString()
         var ayah = ayahString.toIntOrNull() ?: 1
         if (suppressJump) {
@@ -148,7 +147,7 @@ class JumpFragment : DialogFragment() {
             // ensure in 1..ayahCount
             ayah = ayah.coerceIn(1..ayahCount)
             val page = quranInfo.getPageFromSuraAyah(sura, ayah)
-            pageInput.hint = QuranUtils.getLocalizedNumber(context, page)
+            pageInput.hint = QuranUtils.getLocalizedNumber(page)
             pageInput.text = null
           }
           ayahInput.tag = ayah

@@ -12,14 +12,13 @@ interface Settings {
   suspend fun shouldShowHeaderFooter(): Boolean
   suspend fun shouldShowBookmarks(): Boolean
   suspend fun pageType(): String
+  suspend fun setPageType(pageType: String)
   suspend fun showSidelines(): Boolean
   suspend fun setShowSidelines(show: Boolean)
   suspend fun showLineDividers(): Boolean
   suspend fun setShouldShowLineDividers(show: Boolean)
   suspend fun setAyahTextSize(value: Int)
   suspend fun translationTextSize(): Int
-  suspend fun preferDnsOverHttps(): Boolean
-  suspend fun setPreferDnsOverHttps(value: Boolean)
 
   fun preferencesFlow(): Flow<String>
 }

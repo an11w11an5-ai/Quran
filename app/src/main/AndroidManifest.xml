@@ -15,7 +15,7 @@
 
   <!-- required for posting notifications on Android 13+ (Api 33+) -->
   <uses-permission-sdk-23 android:name="android.permission.POST_NOTIFICATIONS"/>
-  
+
   <!-- required for foreground service types on Android 14+ (Api 34+) -->
   <uses-permission-sdk-23 android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
   <uses-permission-sdk-23 android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
@@ -23,7 +23,11 @@
   <!-- support chromebooks without touch screen -->
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
+  <!-- support android tv -->
+  <uses-feature android:name="android.software.leanback" android:required="false" />
+
   <application
+      android:banner="@mipmap/tv_banner"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:label="@string/app_name"
@@ -36,16 +40,18 @@
       android:theme="@style/Quran"
       android:requestLegacyExternalStorage="true"
       android:enableOnBackInvokedCallback="true"
+      android:localeConfig="@xml/locales_config"
       tools:targetApi="tiramisu">
 
     <activity
         android:name=".QuranDataActivity"
         android:configChanges="keyboardHidden|orientation|screenSize"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
+        <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
       </intent-filter>
       <meta-data android:name="android.app.shortcuts"
                  android:resource="@xml/shortcuts" />
@@ -55,13 +61,14 @@
               android:exported="true" />
     <activity
         android:name=".ui.QuranActivity"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:exported="false"/>
     <activity
         android:name=".AboutUsActivity"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:exported="false"/>
     <activity android:name=".HelpActivity"
+        android:theme="@style/QuranToolBarDayNight"
         android:exported="false"/>
     <activity
         android:name=".ui.PagerActivity"
@@ -70,23 +77,24 @@
         android:exported="false"/>
     <activity
         android:name=".ui.TranslationManagerActivity"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:configChanges="keyboardHidden|orientation|screenSize"
         android:exported="false"/>
     <activity
         android:name=".QuranPreferenceActivity"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:configChanges="keyboardHidden|orientation|screenSize"
         android:exported="false"/>
     <activity
         android:name=".QuranAdvancedPreferenceActivity"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:configChanges="keyboardHidden|orientation|screenSize"
         android:exported="false"/>
 
     <activity
         android:name=".SearchActivity"
         android:launchMode="singleTop"
+        android:theme="@style/QuranToolBarDayNight"
         android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.SEARCH"/>
@@ -156,7 +164,7 @@
     </activity>
 
     <activity android:name=".pageselect.PageSelectActivity"
-        android:theme="@style/QuranToolBar"
+        android:theme="@style/QuranToolBarDayNight"
         android:exported="false"/>
 
     <service
@@ -208,10 +216,26 @@
         android:excludeFromRecents="true"
         android:theme="@style/QuranDialog" />
 
-    <!-- override WorkManager initialization -->
+    <!-- support for app specific locales on Android 12 (32) and lower -->
+    <service
+        android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+        android:enabled="false"
+        android:exported="false">
+      <meta-data
+          android:name="autoStoreLocales"
+          android:value="true" />
+    </service>
+
+    <!-- override WorkManager initialization, but keep androidx.startup for others -->
     <provider
         android:name="androidx.startup.InitializationProvider"
         android:authorities="${applicationId}.androidx-startup"
-        tools:node="remove" />
+        android:exported="false"
+        tools:node="merge">
+      <meta-data
+          android:name="androidx.work.WorkManagerInitializer"
+          android:value="androidx.startup"
+          tools:node="remove" />
+    </provider>
   </application>
 </manifest>

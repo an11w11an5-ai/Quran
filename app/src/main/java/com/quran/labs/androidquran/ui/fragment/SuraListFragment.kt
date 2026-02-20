@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,10 +25,10 @@ import com.quran.labs.androidquran.ui.helpers.QuranListAdapter
 import com.quran.labs.androidquran.ui.helpers.QuranRow
 import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
+import dev.zacsweers.metro.Inject
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.observers.DisposableSingleObserver
-import javax.inject.Inject
 
 class SuraListFragment : Fragment() {
 
@@ -61,6 +64,21 @@ class SuraListFragment : Fragment() {
       itemAnimator = DefaultItemAnimator()
       adapter = QuranListAdapter(requireActivity(), recyclerView, getSuraList(), false)
     }
+
+    ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { view, windowInsets ->
+      val insets = windowInsets.getInsets(
+        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+      )
+      recyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        // top, left, right are handled by QuranActivity
+        view.setPadding(0, 0, 0, insets.bottom)
+      }
+
+      // if we return WindowInsetsCompat.CONSUMED, the SnackBar won't
+      // be properly positioned on Android 29 and below (will be under
+      // the navigation bar).
+      windowInsets
+    }
     return view
   }
 
@@ -89,7 +107,9 @@ class SuraListFragment : Fragment() {
           override fun onError(e: Throwable) {}
         })
 
-      if (quranSettings.isArabicNames) updateScrollBarPositionHoneycomb()
+      if (QuranUtils.isRtl()) {
+        updateScrollBarPositionHoneycomb()
+      }
     }
   }
 
@@ -114,7 +134,7 @@ class SuraListFragment : Fragment() {
     for (juz in 1..JUZ2_COUNT) {
       val headerTitle = activity.getString(
         R.string.juz2_description,
-        QuranUtils.getLocalizedNumber(activity, juz)
+        QuranUtils.getLocalizedNumber(juz)
       )
       val headerBuilder = QuranRow.Builder()
         .withType(QuranRow.HEADER)

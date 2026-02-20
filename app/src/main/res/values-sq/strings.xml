@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="app_name">Kurani</string>
   <string name="downloadPrompt_title">Shkarko Skedarët e Kërkuar?</string>
   <string name="downloadPrompt">Në mënyrë që Kur\'ani Android të punojë siç duhet, ne duhet të shkarkojmë disa skedarë. Nëse nuk e bëni këtë tani, aplikacioni mund të mos funksionojë në mënyrë të besueshme dhe do të kërkojë një lidhje interneti për lexim. Dëshironi të shkarkoni skedarët e kërkuar tani?
@@ -91,7 +91,7 @@
   <string name="storage_permission_please_restart">Ju lutem rinisni aplikacionin që kjo të hyjë në fuqi.</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Gjendet në suren %1$s: %2$d (page %3$d)</string>
+  <string name="found_in_sura">Gjendet në suren (%1$d) %2$s: %3$d (page %4$d)</string>
   <string name="no_results">Nuk u gjet asnjë rezultat për \"%s\"</string>
   <string name="no_arabic_search_available">Nuk e keni shkarkuar paketën e kërkimit arab. Ju lutem shkarkojeni dhe provoni kërkimin tuaj përsëri.</string>
   <string name="get_arabic_search_db">Merr bazën e të dhënave të kërkimit në arabisht</string>
@@ -105,12 +105,6 @@
   <string name="prefs_use_arabic_title">Modaliteti arab (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Përdor arabisht për ndërfaqen e aplikimit</string>
   <string name="prefs_new_background_title">Sfond i ri</string>
-  <string name="prefs_lock_orientation_title">Kyçi orientimin e ekranit</string>
-  <string name="prefs_lock_orientation_summary_on">Përdor modalitetin e orientimit fiks</string>
-  <string name="prefs_lock_orientation_summary_off">Përshtatës me mënyrën aktuale të orientimit</string>
-  <string name="prefs_landscape_orientation_title">Orientimi i peizazhit</string>
-  <string name="prefs_landscape_orientation_summary_on">Përdor gjithmonë mënyrën e peizazhit</string>
-  <string name="prefs_landscape_orientation_summary_off">Përdor gjithmonë modalitetin e portretit</string>
   <string name="prefs_night_mode_title">Modaliteti i natës</string>
   <string name="prefs_night_mode_summary">Përdor gërmat e sfondit të errët dhe të dritës</string>
   <string name="prefs_night_mode_text_brightness_title">Shkëlqimi i tekstit</string>

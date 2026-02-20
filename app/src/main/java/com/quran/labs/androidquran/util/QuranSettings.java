@@ -53,18 +53,6 @@ public class QuranSettings {
     prefs.unregisterOnSharedPreferenceChangeListener(listener);
   }
 
-  public boolean isArabicNames() {
-    return prefs.getBoolean(Constants.PREF_USE_ARABIC_NAMES, false);
-  }
-
-  public boolean isLockOrientation() {
-    return prefs.getBoolean(Constants.PREF_LOCK_ORIENTATION, false);
-  }
-
-  public boolean isLandscapeOrientation() {
-    return prefs.getBoolean(Constants.PREF_LANDSCAPE_ORIENTATION, false);
-  }
-
   public boolean navigateWithVolumeKeys() {
     return prefs.getBoolean(Constants.PREF_USE_VOLUME_KEY_NAV, false);
   }
@@ -150,14 +138,6 @@ public class QuranSettings {
         Constants.DEFAULT_TEXT_SIZE);
   }
 
-  public boolean getPreferDnsOverHttps() {
-    return prefs.getBoolean(Constants.PREFS_PREFER_DNS_OVER_HTTPS, true);
-  }
-
-  public void setPreferDnsOverHttps(boolean preferDnsOverHttps) {
-    prefs.edit().putBoolean(Constants.PREFS_PREFER_DNS_OVER_HTTPS, preferDnsOverHttps).apply();
-  }
-
   public int getLastPage() {
     return prefs.getInt(Constants.PREF_LAST_PAGE, Constants.NO_PAGE);
   }
@@ -230,6 +210,22 @@ public class QuranSettings {
         appContext.getResources().getBoolean(R.bool.show_sura_names_translation));
   }
 
+  public String currentTheme() {
+    final String theme = prefs.getString(Constants.PREF_APP_THEME, null);
+    if (theme == null) {
+      final int version = getVersion();
+      final String defaultTheme;
+      if (version == 0) {
+        defaultTheme = Constants.THEME_DEFAULT;
+      } else {
+        defaultTheme = Constants.THEME_DARK;
+      }
+      prefs.edit().putString(Constants.PREF_APP_THEME, defaultTheme).apply();
+      return defaultTheme;
+    }
+    return theme;
+  }
+
   // probably should eventually move this to Application.onCreate..
   public void upgradePreferences(PreferencesUpgrade preferencesUpgrade) {
     int version = getVersion();
@@ -248,11 +244,13 @@ public class QuranSettings {
         setVersion(BuildConfig.VERSION_CODE);
       }
 
-      // remove debug info that is no longer needed
+      // remove debug info and other preferences that are no longer needed
       perInstallationPrefs.edit().remove("debugDidDownloadPages")
           .remove("debugPageDownloadedPath")
           .remove("debugPagesDownloadedTime")
           .remove("debugPagesDownloaded")
+          .remove("lockOrientation")
+          .remove("landscapeOrientation")
           .apply();
     }
   }

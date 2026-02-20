@@ -1,12 +1,7 @@
 plugins {
   id("quran.android.library.android")
   alias(libs.plugins.sqldelight)
-  alias(libs.plugins.anvil)
-}
-
-anvil {
-  useKsp(contributesAndFactoryGeneration = true)
-  generateDaggerFactories.set(true)
+  alias(libs.plugins.metro)
 }
 
 android.namespace = "com.quran.mobile.translation"
@@ -24,9 +19,6 @@ sqldelight {
 dependencies {
   implementation(project(":common:di"))
   implementation(project(":common:data"))
-
-  // dagger
-  implementation(libs.dagger.runtime)
 
   // coroutines
   implementation(libs.kotlinx.coroutines.core)

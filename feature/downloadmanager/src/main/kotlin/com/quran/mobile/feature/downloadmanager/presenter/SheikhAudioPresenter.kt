@@ -7,6 +7,7 @@ import com.quran.labs.androidquran.common.audio.cache.AudioCacheInvalidator
 import com.quran.labs.androidquran.common.audio.cache.QariDownloadInfoManager
 import com.quran.labs.androidquran.common.audio.model.download.AudioDownloadMetadata
 import com.quran.labs.androidquran.common.audio.model.download.QariDownloadInfo
+import com.quran.labs.androidquran.common.audio.util.AudioExtensionDecider
 import com.quran.mobile.common.download.DownloadConstants
 import com.quran.mobile.common.download.DownloadInfo
 import com.quran.mobile.common.download.DownloadInfoStreams
@@ -15,6 +16,7 @@ import com.quran.mobile.feature.downloadmanager.model.sheikhdownload.EntryForQar
 import com.quran.mobile.feature.downloadmanager.model.sheikhdownload.SheikhDownloadDialog
 import com.quran.mobile.feature.downloadmanager.model.sheikhdownload.SheikhUiModel
 import com.quran.mobile.feature.downloadmanager.model.sheikhdownload.SuraDownloadStatusEvent
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +30,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import java.io.File
-import javax.inject.Inject
 
 @ActivityScope
 class SheikhAudioPresenter @Inject constructor(
@@ -36,6 +37,7 @@ class SheikhAudioPresenter @Inject constructor(
   private val downloadInfoStream: DownloadInfoStreams,
   private val quranFileManager: QuranFileManager,
   private val audioCacheInvalidator: AudioCacheInvalidator,
+  private val audioExtensionDecider: AudioExtensionDecider,
   private val downloader: Downloader
 ) {
   private val selectedEntriesFlow = MutableStateFlow<List<EntryForQari>>(emptyList())
@@ -192,10 +194,14 @@ class SheikhAudioPresenter @Inject constructor(
               databasePath.delete()
             }
           }
-          suras.map { it.toString().padStart(3, '0') + ".mp3" }
-            .map { File(File(directory, qari.path), it) }
-            .filter { it.exists() }
-            .forEach { it.delete() }
+          val allowedExtensions = audioExtensionDecider.allowedAudioExtensions(qari)
+          suras.flatMap {
+            val paddedSura = it.toString().padStart(3, '0')
+            allowedExtensions.map { ext ->
+              File(File(directory, qari.path), "$paddedSura.$ext")
+            }
+          }.filter { it.exists() }
+           .forEach { it.delete() }
         } else {
           suras.map { File(File(directory, qari.path), it.toString()) }
             .filter { it.isDirectory }

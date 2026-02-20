@@ -4,30 +4,21 @@ import com.quran.analytics.AnalyticsProvider
 import com.quran.labs.androidquran.common.audio.model.QariItem
 import com.quran.labs.androidquran.presenter.data.QuranEventLogger.AudioPlaybackSource.PAGE
 import com.quran.labs.androidquran.util.QuranSettings
-import dagger.Reusable
-import javax.inject.Inject
+import com.quran.labs.androidquran.util.QuranUtils
+import dev.zacsweers.metro.Inject
 
-@Reusable
 class QuranEventLogger @Inject constructor(
   private val analyticsProvider: AnalyticsProvider,
   private val quranSettings: QuranSettings
 ) {
 
   fun logAnalytics(isDualPages: Boolean, showingTranslations: Boolean, isSplitScreen: Boolean) {
-    val isLockOrientation = quranSettings.isLockOrientation
-    val lockingOrientation =  when {
-      isLockOrientation && quranSettings.isLandscapeOrientation -> "landscape"
-      isLockOrientation -> "portrait"
-      else -> "no"
-    }
-
     val params : Map<String, Any> = mapOf(
         "mode" to getScreenMode(isDualPages, showingTranslations, isSplitScreen),
         "pageType" to quranSettings.pageType,
         "isNightMode" to quranSettings.isNightMode,
-        "isArabic" to quranSettings.isArabicNames,
+        "isArabic" to (QuranUtils.getCurrentLocale().language == "ar"),
         "background" to if (quranSettings.useNewBackground()) "default" else "legacy",
-        "isLockingOrientation" to lockingOrientation,
         "overlayInfo" to quranSettings.shouldOverlayPageInfo(),
         "markerPopups" to quranSettings.shouldDisplayMarkerPopup(),
         "navigation" to if (quranSettings.navigateWithVolumeKeys()) "with_volume" else "default",

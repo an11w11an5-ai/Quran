@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="app_name">Коран</string>
   <string name="downloadPrompt_title">Завантажити необхідні файли?</string>
   <string name="downloadPrompt">Для того, щоб Quran Android працював належним чином, нам потрібно завантажити деякі файли. Якщо ви не зробите цього зараз, додаток може не працювати надійно і вимагатиме підключення до Інтернету для читання. Завантажити потрібні файли зараз?
@@ -91,7 +91,7 @@
   <string name="storage_permission_please_restart">Перезапустіть програму, щоб вона набрала сили.</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Знайдено в Сура %1$s: %2$d (сторінка %3$d)</string>
+  <string name="found_in_sura">Знайдено в Сура (%1$d) %2$s: %3$d (сторінка %4$d)</string>
   <string name="no_results">Не знайдено результатів для \"%s\"</string>
   <string name="no_arabic_search_available">Ви ще не завантажили арабський пошуковий пакет. Завантажте його та повторіть пошук.</string>
   <string name="get_arabic_search_db">Отримати арабську базу даних пошуку</string>
@@ -105,12 +105,6 @@
   <string name="prefs_use_arabic_title">Арабський режим (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Використовуйте арабську мову для інтерфейсу програми</string>
   <string name="prefs_new_background_title">Нове тло</string>
-  <string name="prefs_lock_orientation_title">Орієнтація екрана блокування</string>
-  <string name="prefs_lock_orientation_summary_on">Використання режиму фіксованої орієнтації</string>
-  <string name="prefs_lock_orientation_summary_off">Адаптивний до поточного режиму орієнтації</string>
-  <string name="prefs_landscape_orientation_title">Альбомна орієнтація</string>
-  <string name="prefs_landscape_orientation_summary_on">Завжди використовувати альбомний режим</string>
-  <string name="prefs_landscape_orientation_summary_off">Завжди використовувати книжковий режим</string>
   <string name="prefs_night_mode_title">Нічний режим</string>
   <string name="prefs_night_mode_summary">Використання темного фону та світлих шрифтів</string>
   <string name="prefs_night_mode_text_brightness_title">Яскравість тексту</string>

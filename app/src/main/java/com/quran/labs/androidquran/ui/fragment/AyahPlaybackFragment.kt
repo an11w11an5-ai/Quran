@@ -18,14 +18,13 @@ import com.quran.labs.androidquran.common.audio.model.playback.AudioRequest
 import com.quran.labs.androidquran.ui.PagerActivity
 import com.quran.labs.androidquran.ui.helpers.SlidingPagerAdapter
 import com.quran.labs.androidquran.ui.util.TypefaceManager
-import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.QuranSpinner
 import com.quran.mobile.di.AyahActionFragmentProvider
 import com.shawnlin.numberpicker.NumberPicker
+import dev.zacsweers.metro.Inject
 import java.text.NumberFormat
 import java.util.Locale
-import javax.inject.Inject
 import com.quran.mobile.common.ui.core.R as UiCoreR
 
 class AyahPlaybackFragment : AyahActionFragment() {
@@ -88,18 +87,14 @@ class AyahPlaybackFragment : AyahActionFragment() {
     }
 
     val context = requireContext()
-    val isArabicNames = QuranSettings.getInstance(context).isArabicNames
-    val locale: Locale = if (isArabicNames) {
-      Locale("ar")
-    } else {
-      Locale.getDefault()
-    }
+    val locale: Locale = QuranUtils.getCurrentLocale()
     val numberFormat = NumberFormat.getNumberInstance(locale)
     val values = arrayOfNulls<String>(MAX_REPEATS + 1)
     for (i in 1..MAX_REPEATS) {
       values[i - 1] = numberFormat.format(i.toLong())
     }
-    values[MAX_REPEATS] = getString(com.quran.mobile.common.ui.core.R.string.infinity)
+    values[MAX_REPEATS] = getString(UiCoreR.string.infinity)
+    val isArabicNames = locale.language == "ar"
     if (isArabicNames) {
       listOf(repeatVersePicker, repeatRangePicker, playbackSpeedPicker).forEach {
         it.formatter = NumberPicker.Formatter { value: Int -> arFormat(value) }
@@ -147,7 +142,7 @@ class AyahPlaybackFragment : AyahActionFragment() {
   }
 
   private fun arFormat(value: Int): String {
-    val numberFormat = NumberFormat.getNumberInstance(Locale("ar"))
+    val numberFormat = NumberFormat.getNumberInstance(Locale("ar", "EG"))
     return numberFormat.format(value.toLong())
   }
 
@@ -233,8 +228,7 @@ class AyahPlaybackFragment : AyahActionFragment() {
   ) {
     val suras = context.resources.getStringArray(UiCoreR.array.sura_names)
     for (i in suras.indices) {
-      suras[i] = QuranUtils.getLocalizedNumber(context, i + 1) +
-          ". " + suras[i]
+      suras[i] = QuranUtils.getLocalizedNumber(i + 1) + ". " + suras[i]
     }
     val adapter = ArrayAdapter<CharSequence>(context, ITEM_LAYOUT, suras)
     adapter.setDropDownViewResource(ITEM_DROPDOWN_LAYOUT)
@@ -245,7 +239,7 @@ class AyahPlaybackFragment : AyahActionFragment() {
         val ayahCount = quranInfo.getNumberOfAyahs(sura)
         val ayahs: Array<CharSequence?> = arrayOfNulls(ayahCount)
         for (i in 0 until ayahCount) {
-          ayahs[i] = QuranUtils.getLocalizedNumber(context, i + 1)
+          ayahs[i] = QuranUtils.getLocalizedNumber(i + 1)
         }
         ayahAdapter!!.clear()
         for (i in 0 until ayahCount) {
@@ -265,7 +259,7 @@ class AyahPlaybackFragment : AyahActionFragment() {
     // initialize the ayah spinner with a single item - "100" - without
     // doing this, measurement can't measure the item and makes the width
     // less than what it should be
-    ayahAdapter.add(QuranUtils.getLocalizedNumber(context, 100))
+    ayahAdapter.add(QuranUtils.getLocalizedNumber(100))
     spinner.adapter = ayahAdapter
     return ayahAdapter
   }
@@ -281,7 +275,7 @@ class AyahPlaybackFragment : AyahActionFragment() {
       val ayahs: Array<CharSequence?> = arrayOfNulls(maxAyah)
 
       for (i in 0 until maxAyah) {
-        ayahs[i] = QuranUtils.getLocalizedNumber(context, i + 1)
+        ayahs[i] = QuranUtils.getLocalizedNumber(i + 1)
       }
       adapter.clear()
       for (i in 0 until maxAyah) {

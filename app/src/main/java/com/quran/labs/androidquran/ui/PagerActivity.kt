@@ -6,8 +6,6 @@ import android.app.SearchManager
 import android.content.ComponentName
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -130,6 +128,7 @@ import com.quran.page.common.factory.PageViewFactoryProvider
 import com.quran.page.common.toolbar.AyahToolBar
 import com.quran.page.common.toolbar.di.AyahToolBarInjector
 import com.quran.reading.common.ReadingEventPresenter
+import dev.zacsweers.metro.Inject
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -155,7 +154,6 @@ import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 import kotlin.math.abs
 
 /**
@@ -271,9 +269,6 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   }
 
   public override fun onCreate(savedInstanceState: Bundle?) {
-    val quranApp = application as QuranApplication
-    quranApp.refreshLocale(this, false)
-
     WindowCompat.setDecorFitsSystemWindows(window, false)
     super.onCreate(savedInstanceState)
 
@@ -284,7 +279,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       savedInstanceState?.getBoolean(LAST_FOLDING_STATE, isFoldableDeviceOpenAndVertical)
         ?: isFoldableDeviceOpenAndVertical
 
-    lifecycleScope.launch(scope.coroutineContext) {
+    lifecycleScope.launch {
       lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
         WindowInfoTracker.getOrCreate(this@PagerActivity)
           .windowLayoutInfo(this@PagerActivity)
@@ -292,8 +287,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
           .collectLatest {
             val foldingFeatures = it.filterIsInstance<FoldingFeature>().firstOrNull()
             if (foldingFeatures != null) {
-              val localState = foldingFeatures.state == FoldingFeature.State.FLAT &&
-                  foldingFeatures.orientation == FoldingFeature.Orientation.VERTICAL
+              val localState =
+                foldingFeatures.orientation == FoldingFeature.Orientation.VERTICAL &&
+                    (foldingFeatures.state == FoldingFeature.State.FLAT || foldingFeatures.state == FoldingFeature.State.HALF_OPENED)
               if (isFoldableDeviceOpenAndVertical != localState) {
                 isFoldableDeviceOpenAndVertical = localState
                 updateDualPageMode()
@@ -602,20 +598,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     // just got created, need to reconnect to service
     shouldReconnect = true
 
-    // enforce orientation lock
-    if (quranSettings.isLockOrientation) {
-      val current = resources.configuration.orientation
-      if (quranSettings.isLandscapeOrientation) {
-        if (current == Configuration.ORIENTATION_PORTRAIT) {
-          requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-          return
-        }
-      } else if (current == Configuration.ORIENTATION_LANDSCAPE) {
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return
-      }
-    }
-
+    // log analytics
     quranEventLogger.logAnalytics(isDualPages, showingTranslation, isSplitScreen)
 
     // Setup recitation (if enabled)
@@ -701,7 +684,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     // Create and set fragment pager adapter
     slidingPagerAdapter = SlidingPagerAdapter(
       supportFragmentManager,
-      quranSettings.isArabicNames || QuranUtils.isRtl(),
+      QuranUtils.isRtl(),
       additionalAyahPanels
     )
     slidingPager.setAdapter(slidingPagerAdapter)
@@ -1610,17 +1593,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   override fun setPlaybackSpeed(speed: Float) {
     val lastAudioRequest = audioStatusRepositoryBridge.audioRequest()
     if (lastAudioRequest != null) {
-      val updatedAudioRequest = AudioRequest(
-        lastAudioRequest.start,
-        lastAudioRequest.end,
-        lastAudioRequest.qari,
-        lastAudioRequest.repeatInfo,
-        lastAudioRequest.rangeRepeatInfo,
-        lastAudioRequest.enforceBounds,
-        speed,
-        lastAudioRequest.shouldStream,
-        lastAudioRequest.audioPathInfo
-      )
+      val updatedAudioRequest = lastAudioRequest.copy(playbackSpeed = speed)
 
       val i = Intent(this, AudioService::class.java)
       i.setAction(AudioService.ACTION_UPDATE_SETTINGS)
@@ -1684,16 +1657,11 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   ): Boolean {
     val lastAudioRequest = audioStatusRepositoryBridge.audioRequest()
     if (lastAudioRequest != null) {
-      val updatedAudioRequest = AudioRequest(
-        lastAudioRequest.start,
-        lastAudioRequest.end,
-        lastAudioRequest.qari,
-        verseRepeat,
-        rangeRepeat,
-        enforceRange,
-        playbackSpeed,
-        lastAudioRequest.shouldStream,
-        lastAudioRequest.audioPathInfo
+      val updatedAudioRequest = lastAudioRequest.copy(
+        repeatInfo = verseRepeat,
+        rangeRepeatInfo = rangeRepeat,
+        enforceBounds = enforceRange,
+        playbackSpeed = playbackSpeed
       )
       val i = Intent(this, AudioService::class.java)
       i.setAction(AudioService.ACTION_UPDATE_SETTINGS)
@@ -1708,17 +1676,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   override fun setRepeatCount(repeatCount: Int) {
     val lastAudioRequest = audioStatusRepositoryBridge.audioRequest()
     if (lastAudioRequest != null) {
-      val updatedAudioRequest = AudioRequest(
-        lastAudioRequest.start,
-        lastAudioRequest.end,
-        lastAudioRequest.qari,
-        repeatCount,
-        lastAudioRequest.rangeRepeatInfo,
-        lastAudioRequest.enforceBounds,
-        lastAudioRequest.playbackSpeed,
-        lastAudioRequest.shouldStream,
-        lastAudioRequest.audioPathInfo
-      )
+      val updatedAudioRequest = lastAudioRequest.copy(repeatInfo = repeatCount)
 
       val i = Intent(this, AudioService::class.java)
       i.setAction(AudioService.ACTION_UPDATE_SETTINGS)

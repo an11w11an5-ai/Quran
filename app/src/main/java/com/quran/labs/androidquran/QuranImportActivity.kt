@@ -9,7 +9,7 @@ import androidx.core.app.ActivityCompat
 import com.quran.data.model.bookmark.BookmarkData
 import com.quran.labs.androidquran.presenter.QuranImportPresenter
 import com.quran.labs.androidquran.ui.util.ToastCompat
-import javax.inject.Inject
+import dev.zacsweers.metro.Inject
 
 class QuranImportActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -19,9 +19,8 @@ class QuranImportActivity : AppCompatActivity(), ActivityCompat.OnRequestPermiss
   lateinit var presenter: QuranImportPresenter
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    val quranApp = application as QuranApplication
-    quranApp.refreshLocale(this, false)
     super.onCreate(savedInstanceState)
+    val quranApp = application as QuranApplication
     quranApp.applicationComponent.inject(this)
   }
 

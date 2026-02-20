@@ -101,7 +101,7 @@
   <string name="storage_permission_please_restart">Harap hidupkan ulang aplikasi ini agar penyimpanan data bisa dilakukan.</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Ditemukan dalam Surat %1$s: %2$d (Halaman %3$d)</string>
+  <string name="found_in_sura">Ditemukan dalam Surat (%1$d) %2$s: %3$d (Halaman %4$d)</string>
   <string name="no_results">Tak ada hasil pencarian untuk \"%s\"</string>
   <string name="no_arabic_search_available">Anda belum mengunduh paket pencarian bahasa Arab. Harap unduh dulu dan ulangi pencarian anda.</string>
   <string name="get_arabic_search_db">Dapatkan Basis Data Pencarian Bahasa Arab</string>
@@ -115,12 +115,6 @@
   <string name="prefs_use_arabic_title">Mode bahasa Arab (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Menggunakan bahasa Arab untuk antarmuka aplikasi</string>
   <string name="prefs_new_background_title">Latar baru</string>
-  <string name="prefs_lock_orientation_title">Kunci orientasi layar</string>
-  <string name="prefs_lock_orientation_summary_on">Menggunakan mode tampilan tetap</string>
-  <string name="prefs_lock_orientation_summary_off">Mengikuti orientasi perangkat</string>
-  <string name="prefs_landscape_orientation_title">Orientasi mendatar</string>
-  <string name="prefs_landscape_orientation_summary_on">Selalu gunakan mode mendatar</string>
-  <string name="prefs_landscape_orientation_summary_off">Selalu gunakan mode tegak</string>
   <string name="prefs_night_mode_title">Mode malam</string>
   <string name="prefs_night_mode_summary">Menggunkan latar gelap dan tulisan terang</string>
   <string name="prefs_night_mode_text_brightness_title">Kecerahan teks</string>

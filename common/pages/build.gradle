@@ -1,11 +1,6 @@
 plugins {
   id 'quran.android.library.android'
-  alias libs.plugins.anvil
-}
-
-anvil {
-  useKsp(true)
-  generateDaggerFactories.set(true)
+  alias libs.plugins.metro
 }
 
 android.namespace 'com.quran.labs.androidquran.common.pages'
@@ -13,6 +8,4 @@ android.namespace 'com.quran.labs.androidquran.common.pages'
 dependencies {
   implementation project(path: ':common:data')
   implementation libs.androidx.fragment.ktx
-
-  implementation libs.dagger.runtime
 }

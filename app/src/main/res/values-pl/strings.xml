@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="app_name">Koran</string>
   <string name="downloadPrompt_title">Pobrać wymagane pliki?</string>
   <string name="downloadPrompt">Aby aplikacja Koran Android działała prawidłowo, musimy pobrać pewne pliki. Jeśli nie zrobisz tego teraz, aplikacja może działać nieprawidłowo i będzie wymagać stałego połączenia z Internetem podczas czytania Koranu. Czy chcesz pobrać wymagane pliki teraz?
@@ -90,7 +90,7 @@
   <string name="storage_permission_please_restart">Zrestartuj aplikację, aby zaaplikować zmiany.</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Znaleziono w Surze %1$s: %2$d (strona %3$d)</string>
+  <string name="found_in_sura">Znaleziono w Surze (%1$d) %2$s: %3$d (strona %4$d)</string>
   <string name="no_results">Nie znaleziono wyników dla \"%s\"</string>
   <string name="no_arabic_search_available">Nie został pobrany pakiet do wyszukiwania w języku arabskim. Pobierz go i spróbuj wyszukać ponownie.</string>
   <string name="get_arabic_search_db">Pobierz bazę danych wyszukiwania w języku arabskim</string>
@@ -104,12 +104,6 @@
   <string name="prefs_use_arabic_title">Tryb arabski (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Użyj języka arabskiego jako interfejsu aplikacji</string>
   <string name="prefs_new_background_title">Nowe tło (bielsze)</string>
-  <string name="prefs_lock_orientation_title">Zablokuj orientację ekranu</string>
-  <string name="prefs_lock_orientation_summary_on">Używana jest jedna, stała orientacja ekranu</string>
-  <string name="prefs_lock_orientation_summary_off">Używana jest systemowa orientacja ekranu</string>
-  <string name="prefs_landscape_orientation_title">Stała orientacja ekranu</string>
-  <string name="prefs_landscape_orientation_summary_on">Zawsze używaj orientacji poziomej</string>
-  <string name="prefs_landscape_orientation_summary_off">Zawsze używaj orientacji pionowej</string>
   <string name="prefs_night_mode_title">Tryb nocny</string>
   <string name="prefs_night_mode_summary">Użyj ciemnego tła i jasnych czcionek</string>
   <string name="prefs_night_mode_text_brightness_title">Jasność tekstu</string>

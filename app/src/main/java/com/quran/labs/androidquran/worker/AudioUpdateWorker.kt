@@ -21,10 +21,10 @@ import com.quran.labs.androidquran.util.AudioUtils
 import com.quran.labs.androidquran.util.NotificationChannelUtil
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranSettings
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.coroutineScope
 import timber.log.Timber
 import java.io.File
-import javax.inject.Inject
 
 class AudioUpdateWorker(
   private val context: Context,
@@ -39,7 +39,8 @@ class AudioUpdateWorker(
     val audioPathRoot = quranFileUtils.getQuranAudioDirectory(context)
     if (audioPathRoot != null) {
       val currentVersion = quranSettings.currentAudioRevision
-      val updates = audioUpdateService.getUpdates(currentVersion)
+      val response = audioUpdateService.getUpdates(currentVersion)
+      val updates = if (response.isSuccessful) response.body() else null
 
       if (updates != null && currentVersion != updates.currentRevision) {
         Timber.d("local version: %d - server version: %d",
@@ -57,9 +58,11 @@ class AudioUpdateWorker(
             if (localUpdate.needsDatabaseUpgrade) {
               // delete the database
               val dbPath = audioUtils.getQariDatabasePathIfGapless(localUpdate.qari)
-              dbPath?.let { SuraTimingDatabaseHandler.clearDatabaseHandlerIfExists(it) }
-              Timber.d("would remove %s", dbPath)
-              File(dbPath).delete()
+              if (dbPath != null) {
+                SuraTimingDatabaseHandler.clearDatabaseHandlerIfExists(dbPath)
+                Timber.d("would remove %s", dbPath)
+                File(dbPath).delete()
+              }
             }
 
             val qari = localUpdate.qari
@@ -72,7 +75,8 @@ class AudioUpdateWorker(
                 // this is a hack to drop the leading 0s in the file name
                 val sura = it.substring(0, 3).toInt().toString()
                 val ayah = it.substring(3, 6).toInt().toString()
-                path + File.separator + sura + File.separator + ayah + ".mp3"
+                val extension = it.substringAfterLast(".")
+                path + File.separator + sura + File.separator + ayah + ".$extension"
               }
               Timber.d("would remove %s", filePath)
               File(filePath).delete()

@@ -1,11 +1,6 @@
 plugins {
   id 'quran.android.library'
-  alias libs.plugins.anvil
-}
-
-anvil {
-  useKsp(true)
-  generateDaggerFactories.set(true)
+  alias libs.plugins.metro
 }
 
 dependencies {
@@ -15,7 +10,4 @@ dependencies {
 
   implementation libs.kotlinx.coroutines.core
   implementation libs.kotlinx.coroutines.android
-
-  // dagger
-  implementation libs.dagger.runtime
 }

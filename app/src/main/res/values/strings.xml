@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Quran</string>
+  <string name="AL QURAN 
+    ">Quran</string>
   <string name="downloadPrompt_title">Download Required Files?</string>
   <string name="downloadPrompt">In order for Quran Android to work properly,
         we need to download some files. If you do not do this now, the app
@@ -37,6 +38,7 @@
   <string name="menu_get_translations">Get Translations</string>
   <string name="menu_jump">@string/gotoPage</string>
   <string name="gotoPage">Go to page</string>
+  <string name="sura_and_ayah">Sura and Ayah</string>
   <string name="please_wait">Please wait…</string>
 
   <!-- about -->
@@ -149,12 +151,13 @@
   <string name="storage_permission_please_restart">Please restart the app for this to take effect.</string>
 
   <!-- Search messages -->
-  <string name="found_in_sura">Found in Surah %1$s: %2$d (page %3$d)</string>
+  <string name="found_in_sura">Found in Surah (%1$d) %2$s: %3$d (page %4$d)</string>
   <string name="no_results">No results found for \"%s\"</string>
   <string name="no_arabic_search_available">You have not downloaded the Arabic search pack. Please download it and try your search again.</string>
   <string name="get_arabic_search_db">Get Arabic Search Database</string>
 
   <!-- Quran Preference Activity -->
+  <string name="appearance">Appearance</string>
   <string name="prefs_volume_key_navigation_title">Volume key navigation</string>
   <string name="prefs_volume_key_navigation_summary">Navigate between pages using volume keys</string>
   <string name="prefs_category_reading">Reading Preferences</string>
@@ -163,21 +166,12 @@
   <string name="prefs_use_arabic_title">Arabic mode (الوضع العربي)</string>
   <string name="prefs_use_arabic_summary_on">Use Arabic for application interface</string>
   <string name="prefs_new_background_title">New background</string>
-  <string name="prefs_lock_orientation_title">Lock screen orientation</string>
-  <string name="prefs_lock_orientation_summary_on">Use fixed orientation mode</string>
-  <string name="prefs_lock_orientation_summary_off">Adaptive to current orientation mode</string>
-  <string name="prefs_landscape_orientation_title">Landscape orientation</string>
-  <string name="prefs_landscape_orientation_summary_on">Always use landscape mode</string>
-  <string name="prefs_landscape_orientation_summary_off">Always use portrait mode</string>
   <string name="prefs_night_mode_title">Night mode</string>
   <string name="prefs_night_mode_summary">Use dark background and light fonts</string>
   <string name="prefs_night_mode_text_brightness_title">Text brightness</string>
   <string name="prefs_night_mode_text_brightness_summary">Brightness of the text when night mode is active</string>
   <string name="prefs_night_mode_background_brightness_title">Background brightness</string>
   <string name="prefs_night_mode_background_brightness_summary">Brightness of the page when night mode is active</string>
-  <string name="prefs_dns_over_https_title">DNS over HTTPS</string>
-  <string name="prefs_dns_over_https_summary_on">Prefer DNS over HTTPS</string>
-  <string name="prefs_dns_over_https_summary_off">Do not use DNS over HTTPS</string>
   <string name="prefs_overlay_page_info_title">Show page info</string>
   <string name="prefs_overlay_page_info_summary">Overlay page number, surah name, and juz\' number while reading</string>
   <string name="prefs_display_marker_title">Display marker popups</string>

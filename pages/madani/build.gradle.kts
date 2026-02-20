@@ -1,11 +1,6 @@
 plugins {
   id("quran.android.library.android")
-  alias(libs.plugins.anvil)
-}
-
-anvil {
-  useKsp(contributesAndFactoryGeneration = true)
-  generateDaggerFactories.set(true)
+  alias(libs.plugins.metro)
 }
 
 android.namespace = "com.quran.labs.androidquran.pages.madani"
@@ -18,6 +13,4 @@ dependencies {
 
   implementation(project(":pages:common:madani"))
   api(project(":pages:data:madani"))
-
-  implementation(libs.dagger.runtime)
 }

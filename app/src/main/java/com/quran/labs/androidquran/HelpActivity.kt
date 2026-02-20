@@ -1,13 +1,12 @@
 package com.quran.labs.androidquran
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,23 +15,17 @@ import androidx.core.view.updateLayoutParams
 class HelpActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    // override these to always be dark since the app doesn't really
-    // have a light theme until now. without this, the clock color in
-    // the status bar will be dark on a dark background.
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
-    )
+    enableEdgeToEdge()
 
     super.onCreate(savedInstanceState)
 
-    val actionBar = supportActionBar
-    if (actionBar != null) {
-      actionBar.setDisplayShowHomeEnabled(true)
-      actionBar.setDisplayHomeAsUpEnabled(true)
-    }
-
     setContentView(R.layout.help)
+
+    val toolbar = findViewById<Toolbar>(R.id.toolbar)
+    toolbar.setTitle(R.string.menu_help)
+    setSupportActionBar(toolbar)
+    val ab = supportActionBar
+    ab?.setDisplayHomeAsUpEnabled(true)
 
     val root = findViewById<ViewGroup>(R.id.root)
     ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
@@ -41,10 +34,25 @@ class HelpActivity : AppCompatActivity() {
       )
       root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         topMargin = insets.top
-        bottomMargin = insets.bottom
         leftMargin = insets.left
         rightMargin = insets.right
       }
+
+      windowInsets
+    }
+
+    val helpWrapper = findViewById<ViewGroup>(R.id.help_wrapper)
+    ViewCompat.setOnApplyWindowInsetsListener(helpWrapper) { _, windowInsets ->
+      val insets = windowInsets.getInsets(
+        WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+      )
+
+      helpWrapper.setPadding(
+        helpWrapper.paddingLeft,
+        helpWrapper.paddingTop,
+        helpWrapper.paddingRight,
+        helpWrapper.paddingBottom + insets.bottom
+      )
 
       windowInsets
     }

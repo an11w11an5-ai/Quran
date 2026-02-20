@@ -4,7 +4,7 @@ import android.content.Context
 import com.quran.data.model.audio.Qari
 import com.quran.data.source.PageProvider
 import com.quran.labs.androidquran.common.audio.model.QariItem
-import javax.inject.Inject
+import dev.zacsweers.metro.Inject
 
 class QariUtil @Inject constructor(private val pageProvider: PageProvider) {
 
@@ -32,15 +32,6 @@ class QariUtil @Inject constructor(private val pageProvider: PageProvider) {
    * @return a list of [QariItem] representing the qaris to show.
    */
   fun getQariList(context: Context): List<QariItem> {
-    return getQariList().map { item ->
-       QariItem(
-        id = item.id,
-        name = context.getString(item.nameResource),
-        url = item.url,
-        path = item.path,
-        hasGaplessAlternative = item.hasGaplessAlternative,
-        db = item.db
-      )
-    }
+    return getQariList().map { item -> QariItem.fromQari(context, item) }
   }
 }

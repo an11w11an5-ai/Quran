@@ -166,7 +166,7 @@ internal class TranslationAdapter(
         }
 
         // and update rows to be highlighted
-        recyclerView.handler.post {
+        recyclerView.post {
           notifyItemRangeChanged(startChangeRange, startChangeCount, HIGHLIGHT_CHANGE)
           val layoutManager = recyclerView.layoutManager
           if ((force || highlightedType == HighlightTypes.AUDIO) && layoutManager is LinearLayoutManager) {
@@ -214,6 +214,7 @@ internal class TranslationAdapter(
       this.dividerColor = textColor
       this.suraHeaderColor = ContextCompat.getColor(context, R.color.translation_sura_header_night)
       this.ayahSelectionColor = ContextCompat.getColor(context, R.color.translation_ayah_selected_color_night)
+      this.inlineAyahColor = ContextCompat.getColor(context, R.color.translation_inline_ayah_highlight_night_color)
     } else {
       this.textColor = ContextCompat.getColor(context, R.color.translation_text_color)
       this.footnoteColor = ContextCompat.getColor(context, R.color.translation_footnote_color)
@@ -221,8 +222,8 @@ internal class TranslationAdapter(
       this.arabicTextColor = Color.BLACK
       this.suraHeaderColor = ContextCompat.getColor(context, R.color.translation_sura_header)
       this.ayahSelectionColor = ContextCompat.getColor(context, R.color.translation_ayah_selected_color)
+      this.inlineAyahColor = ContextCompat.getColor(context, R.color.translation_inline_ayah_highlight_color)
     }
-    this.inlineAyahColor = ContextCompat.getColor(context, R.color.translation_translator_color)
 
     if (this.data.isNotEmpty()) {
       notifyDataSetChanged()
@@ -333,6 +334,7 @@ internal class TranslationAdapter(
         } else {
           if (row.type == TranslationViewRow.Type.TRANSLATOR) {
             text = row.data
+            holder.text.setTextColor(inlineAyahColor)
           } else {
             // translation
             text = row.data?.let { rowText ->
@@ -429,7 +431,7 @@ internal class TranslationAdapter(
   }
 
   private fun collapsedFootnoteSpan(number: Int): SpannableString {
-    val text = QuranUtils.getLocalizedNumber(context, number)
+    val text = QuranUtils.getLocalizedNumber(number)
     val spannable = SpannableString(text)
     spannable.setSpan(SuperscriptSpan(), 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     spannable.setSpan(RelativeSizeSpan(0.7f), 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -479,6 +481,12 @@ internal class TranslationAdapter(
           append(context.getString(R.string.more_arabic))
           setSpan(
             ExpandTafseerSpan(expandClickListener),
+            lastSpace + 1,
+            this.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+          )
+          setSpan(
+            ForegroundColorSpan(inlineAyahColor),
             lastSpace + 1,
             this.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE

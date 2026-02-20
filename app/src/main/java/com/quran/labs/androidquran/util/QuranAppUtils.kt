@@ -4,7 +4,7 @@ import android.text.TextUtils
 import com.quran.data.core.QuranInfo
 import com.quran.data.model.SuraAyah
 import com.quran.labs.androidquran.data.Constants
-import dagger.Reusable
+import dev.zacsweers.metro.Inject
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.json.JSONObject
@@ -15,9 +15,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
-import javax.inject.Inject
 
-@Reusable
 class QuranAppUtils @Inject internal constructor(private val quranInfo: QuranInfo) {
   fun getQuranAppUrlObservable(
     key: String,

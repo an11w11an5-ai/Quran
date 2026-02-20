@@ -80,4 +80,13 @@
   <string name="qari_nabil_rifa3i_gapless">نبيل الرفاعي</string>
   <string name="qari_noreen_siddiq_gapless">نورين محمد صديق</string>
   <string name="qari_tawfeeq_as_sawaigh_gapless">توفيق الصايغ</string>
+  <string name="qari_alijon_qari_gapless">علي بن فيض الله مخدوم</string>
+  <string name="qari_badr_al_turki_gapless">بدر التركي</string>
+  <string name="qari_idrees_abkar_gapless">إدريس أبكر</string>
+  <string name="qari_luhaidan_gapless">محمد اللحيدان</string>
+  <string name="qari_raad_al_kurdi_gapless">رعد الكردي</string>
+  <string name="qari_ahmed_al_nufais_gapless">أحمد النفيس</string>
+  <string name="qari_abdulhadi_kanakeri_gapless">عبدالهادي كناكري</string>
+  <string name="qari_peshawa_qadir_al_qurdi_gapless">بيشاوا قادر الكردي</string>
+  <string name="qari_farman_shawani_gapless">فرمان شواني</string>
 </resources>

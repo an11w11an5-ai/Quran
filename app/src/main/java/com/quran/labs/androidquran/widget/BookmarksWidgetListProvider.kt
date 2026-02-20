@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService.RemoteViewsFactory
+import androidx.core.content.ContextCompat
 import com.quran.data.core.QuranInfo
 import com.quran.labs.androidquran.QuranApplication
 import com.quran.labs.androidquran.R
@@ -13,7 +14,7 @@ import com.quran.labs.androidquran.database.BookmarksDBAdapter
 import com.quran.labs.androidquran.ui.PagerActivity
 import com.quran.labs.androidquran.ui.helpers.QuranRow
 import com.quran.labs.androidquran.ui.helpers.QuranRowFactory
-import javax.inject.Inject
+import dev.zacsweers.metro.Inject
 
 /**
  * [RemoteViewsFactory] implementation responsible for providing a list of bookmark views to be
@@ -62,11 +63,12 @@ class BookmarksWidgetListProvider(private val context: Context) : RemoteViewsFac
     remoteView.setTextViewText(R.id.sura_title, item.text)
     remoteView.setTextViewText(R.id.sura_meta_data, item.metadata)
     remoteView.setImageViewResource(R.id.widget_favorite_icon, item.imageResource)
-    if (item.imageFilterColor == null) {
+    if (item.imageFilterColorResource == null) {
       // If a color filter isn't set, then sometimes the color filter of bookmarks can crossover into each other
       remoteView.setInt(R.id.widget_favorite_icon, "setColorFilter", Color.WHITE)
     } else {
-      remoteView.setInt(R.id.widget_favorite_icon, "setColorFilter", item.imageFilterColor)
+      val imageFilterColor = ContextCompat.getColor(context, item.imageFilterColorResource)
+      remoteView.setInt(R.id.widget_favorite_icon, "setColorFilter", imageFilterColor)
     }
     val fillInIntent = Intent().apply {
       putExtras(Bundle().apply {

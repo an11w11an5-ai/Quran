@@ -8,12 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.util.set
 import androidx.recyclerview.widget.RecyclerView
 import com.quran.data.model.bookmark.Tag
 import com.quran.labs.androidquran.R
 import com.quran.labs.androidquran.ui.QuranActivity
-import com.quran.labs.androidquran.util.LocaleUtil
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.view.JuzView
 import com.quran.labs.androidquran.view.TagsViewGroup
@@ -30,7 +30,7 @@ class QuranListAdapter(
 
   private val inflater = LayoutInflater.from(context)
   private val checkedState = SparseBooleanArray()
-  private val locale = LocaleUtil.getLocale(context)
+  private val locale = QuranUtils.getCurrentLocale()
   private var tagMap: Map<Long, Tag> = emptyMap()
   private var showTags = false
   private var showDate = false
@@ -136,7 +136,7 @@ class QuranListAdapter(
     val item = elements[position]
 
     with(holder) {
-      number.text = QuranUtils.getLocalizedNumber(context, item.sura)
+      number.text = QuranUtils.getLocalizedNumber(item.sura)
       metadata.visibility = View.VISIBLE
       metadata.text = item.metadata
       tags.visibility = View.GONE
@@ -156,11 +156,11 @@ class QuranListAdapter(
         }
         else -> {
           image.setImageResource(item.imageResource)
-          if (item.imageFilterColor == null) {
+          if (item.imageFilterColorResource == null) {
             image.colorFilter = null
           } else {
             image.setColorFilter(
-              item.imageFilterColor, PorterDuff.Mode.SRC_ATOP
+              ContextCompat.getColor(context, item.imageFilterColorResource), PorterDuff.Mode.SRC_ATOP
             )
           }
 
@@ -205,7 +205,7 @@ class QuranListAdapter(
       holder.pageNumber.visibility = View.GONE
     } else {
       holder.pageNumber.visibility = View.VISIBLE
-      holder.pageNumber.text = QuranUtils.getLocalizedNumber(context, item.page)
+      holder.pageNumber.text = QuranUtils.getLocalizedNumber(item.page)
     }
     holder.setChecked(isItemChecked(pos))
     holder.setEnabled(isEnabled(pos))
